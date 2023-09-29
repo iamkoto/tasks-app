@@ -1,122 +1,143 @@
 document.addEventListener('DOMContentLoaded', function () {
     const listaPessoas = document.getElementById('listaPessoas');
     const adicionarPessoaButton = document.getElementById('adicionarPessoa');
-    
+
+
     adicionarPessoaButton.addEventListener('click', function () {
-        const nome = document.getElementById('nomeInput').value;
-        const idade = parseInt(document.getElementById('idadeInput').value);
-        const cidade = document.getElementById('cidadeInput').value;
-        const sangue = document.getElementById('sangueInput').value;
-        
-        if (nome && !isNaN(idade) && cidade && sangue) {
-            // cria um objeto pessoa com os dados
-            const pessoa = {
-                nome: nome,
-                idade: idade,
-                cidade: cidade,
-                sangue: sangue,
+        const tarefa = document.getElementById('taskInput').value;
+        const who = document.getElementById('whoInput').value;
+        const status = document.getElementById('statusInput').value;
+        const dateInput = document.getElementById('dateInput');
+        const date = formatDate(dateInput.value);
+
+        if (tarefa && who && status && date) {
+            const task = {
+                tarefa: tarefa,
+                responsavel: who,
+                situacao: status,
+                data: date,
             };
 
-            // adiciona a pessoa ao JSON
-            adicionarPessoa(pessoa);
-        } else if  (!nome) {
-            alert('Preencher o campo nome');
-        } else if (!idade) {
-            alert('Idade inválida');
-        } else if (!cidade) {
-            alert('Dados da cidade inválido');
-        } else if(!sangue) {
-            alert('Tipo de sangue inválido');
-        } 
-         else {
+            adicionarPessoa(task);
+        } else if (!tarefa) {
+            alert('Task inexistente');
+        } else if (!who) {
+            alert('Pessoa inválida');
+        } else if (!status) {
+            alert('Status inexistente');
+        } else if (!date) {
+            alert('Data inválida');
+        } else {
             alert('Preencha todos os campos corretamente');
         }
     });
-    function adicionarPessoa(pessoa) {
+
+    function formatDate(isoDate) {
+        const dateObject = new Date(isoDate);
+        const dia = dateObject.getDate() + 1;
+        const mes = dateObject.getMonth() + 1;
+        const ano = dateObject.getFullYear();
+
+        return `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}/${ano}`;
+    }
+
+    function adicionarPessoa(task) {
         const jsonAtual = {
-            pessoas: []
-        }
+            tasks: []
+        };
         const jsonArmazenado = localStorage.getItem('dadosJson');
 
         if (jsonArmazenado) {
             try {
                 const parsedJson = JSON.parse(jsonArmazenado);
 
-                if (Array.isArray(parsedJson.pessoas)) {
-                    jsonAtual.pessoas = parsedJson.pessoas;
+                if (Array.isArray(parsedJson.tasks)) {
+                    jsonAtual.tasks = parsedJson.tasks;
                 }
             } catch (error) {
-                console.error('erro ao analizar JSON', error);
+                console.error('erro ao analisar JSON', error);
             }
         }
 
-        // adiciona a nova pessoa
-        jsonAtual.pessoas.push(pessoa);
+        jsonAtual.tasks.push(task);
 
-        // atualiza o JSON
         localStorage.setItem('dadosJson', JSON.stringify(jsonAtual));
 
-        // limpa os campos
-        document.getElementById("nomeInput").value = '';
-        document.getElementById("idadeInput").value = '';
-        document.getElementById("cidadeInput").value = '';
-        document.getElementById("sangueInput").value = '';
+        document.getElementById("taskInput").value = '';
+        document.getElementById("whoInput").value = '';
+        document.getElementById("statusInput").value = '';
+        document.getElementById("dateInput").value = '';
 
-        atualizarListaPessoas(jsonAtual.pessoas);
+        atualizarListaPessoas(jsonAtual.tasks);
     }
-    function atualizarListaPessoas(pessoas) {
-        // limpa lista de pessoas existentes
+
+    function atualizarListaPessoas(tasks) {
         listaPessoas.innerHTML = '';
 
-        // adiciona pessoas a lista
-        pessoas.forEach(function (pessoa, index) {
+        tasks.forEach(function (task, index) {
             const li = document.createElement('li');
-            li.textContent = `Nome: ${pessoa.nome}, Idade: ${pessoa.idade}, Cidade: ${pessoa.cidade}, Sangue: ${pessoa.sangue}`;
+            li.textContent = `
+             "<div>${task.situacao}</div>" 
+             <div>${task.tarefa} - ${task.responsavel}</div> 
+             <div>${task.data}</div>
+            `;
             listaPessoas.appendChild(li);
 
-            const removeButton = document.createElement('button')
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remover pessoa';
+            li.appendChild(removeButton);
 
-            removeButton.textContent = 'Remover pessoas';
-            li.appendChild(removeButton)
-            
-            // Remover pessoas por pessoa da lista
-            removeButton.addEventListener('click', function() {
-                removerPessoa(index)
+            removeButton.addEventListener('click', function () {
+                removerPessoa(index);
             });
-        })
+        });
     }
-    
-    
+
     function removerPessoa(index) {
         const jsonArmazenado = localStorage.getItem('dadosJson');
 
         if (jsonArmazenado) {
             try {
                 const parsedJson = JSON.parse(jsonArmazenado);
-                if (Array.isArray(parsedJson.pessoas)) {
-                    // Remove a pessoa pelo índice
-                    parsedJson.pessoas.splice(index, 1);
 
-                    // Atualiza o JSON no localStorage
+                if (Array.isArray(parsedJson.tasks)) {
+                    parsedJson.tasks.splice(index, 1);
                     localStorage.setItem('dadosJson', JSON.stringify(parsedJson));
-
-                    // Atualiza a lista de pessoas na página
-                    atualizarListaPessoas(parsedJson.pessoas);
+                    atualizarListaPessoas(parsedJson.tasks);
                 }
             } catch (error) {
-                console.error('erro ao analizar JSON', error);
+                console.error('erro ao analisar JSON', error);
             }
-        };
+        }
     }
 
-    
+    const limpaLista = document.getElementById('limpaLista');
 
-
-    // Botão que apaga toda lista criada anteriormente
-    const limpaLista = document.getElementById('limpaLista')
-
-    limpaLista.addEventListener('click', function (){
+    limpaLista.addEventListener('click', function () {
         localStorage.clear();
         listaPessoas.innerHTML = '';
+    });
+
+    const addThreePeople = document.getElementById('addThreePeople');
+
+    addThreePeople.addEventListener('click', function () {
+        for (let i = 0; i < 3; i++) {
+            const taskInput = document.getElementById('taskInput');
+            const whoInput = document.getElementById('whoInput');
+            const statusInput = document.getElementById('statusInput');
+            const dateInput = document.getElementById('dateInput');
+
+            taskInput.value = `teste ${(i + 1)}`;
+            whoInput.value = 'jose';
+            statusInput.value = 'produzindo';
+            dateInput.value = '10/2/2024';
+
+            adicionarPessoa({
+                tarefa: taskInput.value,
+                responsavel: whoInput.value,
+                situacao: statusInput.value,
+                data: dateInput.value
+            });
+        }
     });
 });

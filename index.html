@@ -7,17 +7,28 @@
     <title>Consumir JSON</title>
 </head>
 <body>
-    <h1>Adicionar pessoa</h1>
+    <h1>
+        Adicionar tarefa
 
-    <input id="nomeInput" type="text" placeholder="Nome">
-    <input id="idadeInput" type="number" placeholder="Idade">
-    <input id="cidadeInput" type="text" placeholder="Cidade">
-    <input id="sangueInput" type="text" placeholder="Sangue" >
+        <button id="addThreePeople">Add</button>
+    </h1>
+
+
+    <input id="taskInput" type="text" placeholder="Task">
+    <input id="whoInput" type="text" placeholder="Responsável">
+    <select id="statusInput" name="">
+        <option value="">Selecione</option>
+        <option value="Backlog">Backlog</option>
+        <option value="Em Andamento">Em andamento</option>
+        <option value="Concluído">Concluído</option>
+        <option value="Impeditivo">Impeditivo</option>
+    </select>
+    <input id="dateInput" type="date" placeholder="Data" >
 
     <button id="adicionarPessoa">Adicionar</button>
     
     
-    <h2>Pessoas</h2>
+    <h2>Tarefas</h2>
 
     <ul id="listaPessoas"></ul>
 
