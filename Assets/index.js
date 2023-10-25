@@ -76,29 +76,71 @@ document.addEventListener('DOMContentLoaded', function () {
 
         tasks.forEach(function (task, index) {
             const li = document.createElement('li');
-            li.textContent = `
-             "<div>${task.situacao}</div>" 
+            li.innerHTML = `
+             <div>
+             <select id="status-select" class="status-select" data-index="${index}">
+             <option value="Backlog" ${task.situacao === 'Backlog' ? 'selected' : ''}>Backlog</option>
+             <option value="Em Andamento" ${task.situacao === 'Em Andamento' ? 'selected' : ''}>Em andamento</option>
+             <option value="Concluído" ${task.situacao === 'Concluído' ? 'selected' : ''}>Concluído</option>
+             <option value="Impeditivo" ${task.situacao === 'Impeditivo' ? 'selected' : ''}>Impeditivo</option>
+             </select>
+             </div>
              <div>${task.tarefa} - ${task.responsavel}</div> 
              <div>${task.data}</div>
             `;
             listaPessoas.appendChild(li);
 
             const removeButton = document.createElement('button');
-            removeButton.textContent = 'Remover pessoa';
+            removeButton.textContent = 'Remover';
             li.appendChild(removeButton);
 
             removeButton.addEventListener('click', function () {
                 removerPessoa(index);
             });
+            const statusSelect = li.querySelector('.status-select');
+            
+            statusSelect.addEventListener('change', function() {
+                const selectedIndex = parseInt(statusSelect.getAttribute('data-index'));
+                const newStatus = statusSelect.value;
+
+                atualizarStatusTarefa(selectedIndex, newStatus);
+            })
         });
     }
 
+    function atualizarStatusTarefa(index, newStatus) {
+        if (jsonArmazenado) {
+            try {
+    
+                if (Array.isArray(parsedJson.tasks)) {
+                    parsedJson.tasks[index].situacao = newStatus;
+                    localStorage.setItem('dadosJson', JSON.stringify(parsedJson));
+                }
+            } catch (error) {
+                console.error('erro ao analisar JSON', error);
+            }
+        }
+    
+    }
+
+    const jsonArmazenado = localStorage.getItem('dadosJson');
+    const parsedJson = JSON.parse(jsonArmazenado);
+
+    if (jsonArmazenado) {
+        try {
+
+            if (Array.isArray(parsedJson.tasks)) {
+                atualizarListaPessoas(parsedJson.tasks);
+            }
+        } catch (error) {
+            console.error('erro ao analisar JSON', error);
+        }
+    }
+
     function removerPessoa(index) {
-        const jsonArmazenado = localStorage.getItem('dadosJson');
 
         if (jsonArmazenado) {
             try {
-                const parsedJson = JSON.parse(jsonArmazenado);
 
                 if (Array.isArray(parsedJson.tasks)) {
                     parsedJson.tasks.splice(index, 1);
@@ -140,4 +182,13 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     });
+
+    const select = document.getElementById('status-select');
+    select.addEventListener('change', function(){
+        const currentValue = select.value;
+
+        if(currentValue === 'Impeditivo') {
+            select.style.backgroundColor = 'red';
+        }
+    }) 
 });
